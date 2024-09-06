@@ -1,3 +1,5 @@
+
+
 from django.db import models
 
 class Payment(models.Model):
@@ -23,6 +25,31 @@ class PaymentView(APIView):
         order = Order.objects.get(id=order_id)
         payment = Payment(order=order, payment_method=payment_method, amount=amount)
 
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from .models import Payment
+
+class PaymentSuccessView(APIView):
+    def post(self, request):
+        payment_id = request.data['payment_id']
+        payment_status = request.data['payment_status']
+
+        payment = Payment.objects.get(id=payment_id)
+        payment.payment_status = payment_status
+        payment.save()
+
+        return Response({'message': 'Payment successful'}, status=201)
+
+class PaymentFailureView(APIView):
+    def post(self, request):
+        payment_id = request.data['payment_id']
+        payment_status = request.data['payment_status']
+
+        payment = Payment.objects.get(id=payment_id)
+        payment.payment_status = payment_status
+        payment.save()
+
+        return Response({'message': 'Payment failed'}, status=400)
         razorpay_order = razorpay_client.order.create(dict(amount=amount, currency='INR', receipt='order_rcptid_11'))
 
         # Redirect the user to the Razorpay payment page
